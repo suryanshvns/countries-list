@@ -30,7 +30,9 @@ export default function SEOTestPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-8">
       <div className="max-w-4xl mx-auto">
         <div className="backdrop-blur-xl bg-white/5 rounded-3xl p-8 border border-white/10">
-          <h1 className="text-4xl font-bold text-white mb-2">SEO Testing Dashboard</h1>
+          <h1 className="text-4xl font-bold text-white mb-2">
+            SEO Testing Dashboard
+          </h1>
           <p className="text-purple-200 mb-8">
             Test and verify your website's SEO implementation
           </p>
@@ -49,8 +51,12 @@ export default function SEOTestPage() {
                   <h3 className="text-lg font-semibold text-white mb-1">
                     {test.name}
                   </h3>
-                  <p className="text-sm text-purple-300 mb-2">{test.description}</p>
-                  <p className="text-xs text-purple-400 font-mono">{test.url}</p>
+                  <p className="text-sm text-purple-300 mb-2">
+                    {test.description}
+                  </p>
+                  <p className="text-xs text-purple-400 font-mono">
+                    {test.url}
+                  </p>
                 </Link>
               ))}
             </div>
@@ -58,25 +64,34 @@ export default function SEOTestPage() {
 
           {/* Testing Instructions */}
           <section className="mb-8">
-            <h2 className="text-2xl font-bold text-white mb-4">
-              How to Test
-            </h2>
+            <h2 className="text-2xl font-bold text-white mb-4">How to Test</h2>
             <div className="backdrop-blur-xl bg-white/5 rounded-xl p-6 border border-white/10">
               <ol className="list-decimal list-inside space-y-3 text-white">
                 <li>
-                  <strong>View Page Source:</strong> Right-click any page → "View Page Source" → Check for meta tags and structured data
+                  <strong>View Page Source:</strong> Right-click any page →
+                  "View Page Source" → Check for meta tags and structured data
                 </li>
                 <li>
-                  <strong>Test Sitemap:</strong> Visit <code className="bg-white/10 px-2 py-1 rounded">/sitemap.xml</code> to verify all pages are listed
+                  <strong>Test Sitemap:</strong> Visit{" "}
+                  <code className="bg-white/10 px-2 py-1 rounded">
+                    /sitemap.xml
+                  </code>{" "}
+                  to verify all pages are listed
                 </li>
                 <li>
-                  <strong>Test Robots.txt:</strong> Visit <code className="bg-white/10 px-2 py-1 rounded">/robots.txt</code> to verify configuration
+                  <strong>Test Robots.txt:</strong> Visit{" "}
+                  <code className="bg-white/10 px-2 py-1 rounded">
+                    /robots.txt
+                  </code>{" "}
+                  to verify configuration
                 </li>
                 <li>
-                  <strong>Use External Tools:</strong> Copy your live URL and test with tools below
+                  <strong>Use External Tools:</strong> Copy your live URL and
+                  test with tools below
                 </li>
                 <li>
-                  <strong>Google Search Console:</strong> Set up and submit your sitemap for indexing
+                  <strong>Google Search Console:</strong> Set up and submit your
+                  sitemap for indexing
                 </li>
               </ol>
             </div>
@@ -128,7 +143,9 @@ export default function SEOTestPage() {
 
           {/* SEO Checklist */}
           <section className="mt-8">
-            <h2 className="text-2xl font-bold text-white mb-4">SEO Checklist</h2>
+            <h2 className="text-2xl font-bold text-white mb-4">
+              SEO Checklist
+            </h2>
             <div className="space-y-2">
               {[
                 "Meta title and description on all pages",
