@@ -26,6 +26,42 @@ export default function SEOTestPage() {
     },
   ];
 
+  const externalTools = [
+    {
+      name: "Google Rich Results Test",
+      url: "https://search.google.com/test/rich-results",
+      description: "Test structured data",
+    },
+    {
+      name: "PageSpeed Insights",
+      url: "https://pagespeed.web.dev/",
+      description: "Check performance & SEO",
+    },
+    {
+      name: "Schema Validator",
+      url: "https://validator.schema.org/",
+      description: "Validate Schema.org markup",
+    },
+    {
+      name: "Meta Tags Checker",
+      url: "https://metatags.io/",
+      description: "Preview social media tags",
+    },
+  ];
+
+  const checklistItems = [
+    "Meta title and description on all pages",
+    "Open Graph tags for social sharing",
+    "Twitter Card tags",
+    "Structured data (JSON-LD)",
+    "Sitemap.xml accessible",
+    "Robots.txt configured",
+    "Canonical URLs set",
+    "Mobile-responsive design",
+    "Fast page load times",
+    "HTTPS enabled (production)",
+  ];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-8">
       <div className="max-w-4xl mx-auto">
@@ -34,10 +70,9 @@ export default function SEOTestPage() {
             SEO Testing Dashboard
           </h1>
           <p className="text-purple-200 mb-8">
-            Test and verify your website's SEO implementation
+            Test and verify your website&apos;s SEO implementation
           </p>
 
-          {/* Quick Tests */}
           <section className="mb-8">
             <h2 className="text-2xl font-bold text-white mb-4">Quick Tests</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -46,6 +81,7 @@ export default function SEOTestPage() {
                   key={test.name}
                   href={test.url}
                   target="_blank"
+                  rel="noopener noreferrer"
                   className="block backdrop-blur-xl bg-white/5 rounded-xl p-4 border border-white/10 hover:bg-white/10 transition-colors"
                 >
                   <h3 className="text-lg font-semibold text-white mb-1">
@@ -62,14 +98,14 @@ export default function SEOTestPage() {
             </div>
           </section>
 
-          {/* Testing Instructions */}
           <section className="mb-8">
             <h2 className="text-2xl font-bold text-white mb-4">How to Test</h2>
             <div className="backdrop-blur-xl bg-white/5 rounded-xl p-6 border border-white/10">
               <ol className="list-decimal list-inside space-y-3 text-white">
                 <li>
                   <strong>View Page Source:</strong> Right-click any page →
-                  "View Page Source" → Check for meta tags and structured data
+                  &quot;View Page Source&quot; → Check for meta tags and
+                  structured data
                 </li>
                 <li>
                   <strong>Test Sitemap:</strong> Visit{" "}
@@ -97,34 +133,12 @@ export default function SEOTestPage() {
             </div>
           </section>
 
-          {/* External Tools */}
           <section className="mt-8">
             <h2 className="text-2xl font-bold text-white mb-4">
               External SEO Tools
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {[
-                {
-                  name: "Google Rich Results Test",
-                  url: "https://search.google.com/test/rich-results",
-                  description: "Test structured data",
-                },
-                {
-                  name: "PageSpeed Insights",
-                  url: "https://pagespeed.web.dev/",
-                  description: "Check performance & SEO",
-                },
-                {
-                  name: "Schema Validator",
-                  url: "https://validator.schema.org/",
-                  description: "Validate Schema.org markup",
-                },
-                {
-                  name: "Meta Tags Checker",
-                  url: "https://metatags.io/",
-                  description: "Preview social media tags",
-                },
-              ].map((tool) => (
+              {externalTools.map((tool) => (
                 <a
                   key={tool.name}
                   href={tool.url}
@@ -141,24 +155,12 @@ export default function SEOTestPage() {
             </div>
           </section>
 
-          {/* SEO Checklist */}
           <section className="mt-8">
             <h2 className="text-2xl font-bold text-white mb-4">
               SEO Checklist
             </h2>
             <div className="space-y-2">
-              {[
-                "Meta title and description on all pages",
-                "Open Graph tags for social sharing",
-                "Twitter Card tags",
-                "Structured data (JSON-LD)",
-                "Sitemap.xml accessible",
-                "Robots.txt configured",
-                "Canonical URLs set",
-                "Mobile-responsive design",
-                "Fast page load times",
-                "HTTPS enabled (production)",
-              ].map((item, index) => (
+              {checklistItems.map((item, index) => (
                 <div
                   key={index}
                   className="flex items-center gap-3 text-white bg-white/5 rounded-lg p-3"
@@ -173,7 +175,6 @@ export default function SEOTestPage() {
             </div>
           </section>
 
-          {/* Back Link */}
           <div className="mt-8 pt-6 border-t border-white/10">
             <Link
               href="/"

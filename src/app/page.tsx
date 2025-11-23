@@ -103,7 +103,7 @@ export default function Home() {
             <CountriesList />
           </Suspense>
         </div>
-      </div>
+    </div>
     </>
   );
 }
