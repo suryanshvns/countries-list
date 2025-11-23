@@ -79,6 +79,9 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/",
   },
+  verification: {
+    google: "RVwS_8le5BZT0PTH8pgE9MI95nkGyyqSdbyGxZuK9ZE",
+  },
   category: "Geography",
 };
 
