@@ -1,15 +1,15 @@
 User-agent: *
 Allow: /
 
+# Allow all country pages
+Allow: /countries/
+
 # Sitemap
-Sitemap: https://your-domain.com/sitemap.xml
+Sitemap: https://countries-list-y9am-iaohqz3vk-suryanshvns-projects.vercel.app/sitemap.xml
 
 # Disallow admin or private areas if any
 # Disallow: /admin/
 # Disallow: /api/
-
-# Allow all country pages
-Allow: /countries/
 
 # Crawl-delay (optional, adjust as needed)
 Crawl-delay: 1
