@@ -82,6 +82,9 @@ export const metadata: Metadata = {
   verification: {
     google: "RVwS_8le5BZT0PTH8pgE9MI95nkGyyqSdbyGxZuK9ZE",
   },
+  other: {
+    "google-site-verification": "RVwS_8le5BZT0PTH8pgE9MI95nkGyyqSdbyGxZuK9ZE",
+  },
   category: "Geography",
 };
 
