@@ -1,9 +1,139 @@
-"use client";
-
 import Image from "next/image";
-import { useCountry } from "@/hooks/use-countries";
 import CountryMap from "./country-map";
-import type { CountryDetail as CountryDetailType } from "@/lib/types";
+
+interface CountryDetail {
+  name: {
+    common: string;
+    official: string;
+    nativeName?: {
+      [key: string]: {
+        official: string;
+        common: string;
+      };
+    };
+  };
+  cca2: string;
+  cca3: string;
+  capital?: string[];
+  region: string;
+  subregion?: string;
+  population: number;
+  area: number;
+  currencies?: {
+    [key: string]: {
+      name: string;
+      symbol: string;
+    };
+  };
+  languages?: {
+    [key: string]: string;
+  };
+  borders?: string[];
+  flags: {
+    png: string;
+    svg: string;
+    alt?: string;
+  };
+  coatOfArms?: {
+    png?: string;
+    svg?: string;
+  };
+  timezones: string[];
+  continents: string[];
+  latlng?: [number, number]; // [latitude, longitude]
+  independent?: boolean;
+  unMember?: boolean;
+  landlocked?: boolean;
+  demonyms?: {
+    [key: string]: {
+      f: string;
+      m: string;
+    };
+  };
+  fifa?: string;
+  car?: {
+    signs?: string[];
+    side: string;
+  };
+  idd?: {
+    root: string;
+    suffixes: string[];
+  };
+  tld?: string[];
+  startOfWeek?: string;
+  gini?: {
+    [key: string]: number;
+  };
+  status?: string;
+  capitalInfo?: {
+    latlng?: [number, number];
+  };
+}
+
+async function getCountryByName(name: string): Promise<CountryDetail | null> {
+  // API requires fields parameter - specify all fields we need for detail page
+  const fields = [
+    "name",
+    "cca2",
+    "cca3",
+    "capital",
+    "region",
+    "subregion",
+    "population",
+    "area",
+    "currencies",
+    "languages",
+    "borders",
+    "flags",
+    "coatOfArms",
+    "timezones",
+    "continents",
+    "latlng",
+    "independent",
+    "unMember",
+    "landlocked",
+    "demonyms",
+    "fifa",
+    "car",
+    "idd",
+    "tld",
+    "startOfWeek",
+    "gini",
+    "status",
+    "capitalInfo",
+  ].join(",");
+
+  const res = await fetch(
+    `https://restcountries.com/v3.1/name/${encodeURIComponent(
+      name
+    )}?fullText=true&fields=${fields}`,
+    {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+      },
+      cache: "no-store",
+    }
+  );
+
+  if (!res.ok) {
+    console.error(`API Error: ${res.status} ${res.statusText}`);
+    return null;
+  }
+
+  const data = await res.json();
+
+  // Validate response
+  if (!Array.isArray(data) || data.length === 0) {
+    return null;
+  }
+
+  return data[0] || null;
+}
+
+interface CountryDetailProps {
+  name: string;
+}
 
 // Icons as components to avoid external dependencies
 const Icons = {
@@ -170,41 +300,13 @@ const Icons = {
   ),
 };
 
-// Loading skeleton component
-function LoadingSkeleton() {
-  return (
-    <div className="space-y-8 animate-pulse">
-      {/* Hero Skeleton */}
-      <div className="w-full h-[400px] bg-white/5 rounded-3xl" />
-      {/* Grid Skeleton */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[...Array(6)].map((_, i) => (
-          <div key={i} className="h-64 bg-white/5 rounded-3xl" />
-        ))}
-      </div>
-    </div>
-  );
-}
+export default async function CountryDetail({ name }: CountryDetailProps) {
+  const country = await getCountryByName(name);
 
-// Error component
-function ErrorDisplay({ error, onRetry }: { error: Error; onRetry: () => void }) {
-  return (
-    <div className="text-center py-12 backdrop-blur-xl bg-red-500/10 rounded-2xl border border-red-500/20">
-      <div className="text-6xl mb-4">😞</div>
-      <h2 className="text-2xl font-bold text-white mb-2">Country Not Found</h2>
-      <p className="text-red-200 mb-6">{error.message}</p>
-      <button
-        onClick={onRetry}
-        className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-purple-500/50"
-      >
-        Try Again
-      </button>
-    </div>
-  );
-}
+  if (!country) {
+    return null;
+  }
 
-// Country content component
-function CountryContent({ country }: { country: CountryDetailType }) {
   const nativeName = country.name.nativeName
     ? Object.values(country.name.nativeName)[0]?.common || country.name.common
     : country.name.common;
@@ -531,34 +633,4 @@ function CountryContent({ country }: { country: CountryDetailType }) {
       </section>
     </>
   );
-}
-
-interface CountryDetailProps {
-  name: string;
-}
-
-export default function CountryDetail({ name }: CountryDetailProps) {
-  const { data: country, isLoading, isError, error, refetch } = useCountry(name);
-
-  if (isLoading) {
-    return <LoadingSkeleton />;
-  }
-
-  if (isError) {
-    return <ErrorDisplay error={error as Error} onRetry={() => refetch()} />;
-  }
-
-  if (!country) {
-    return (
-      <div className="text-center py-12">
-        <div className="text-6xl mb-4">🔍</div>
-        <h2 className="text-2xl font-bold text-white mb-2">Country Not Found</h2>
-        <p className="text-purple-200">
-          We couldn&apos;t find information about this country.
-        </p>
-      </div>
-    );
-  }
-
-  return <CountryContent country={country} />;
 }

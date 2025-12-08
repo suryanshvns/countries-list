@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import CountriesList from "./components/countries-list";
 
 export const metadata: Metadata = {
@@ -76,9 +77,33 @@ export default function Home() {
             </p>
           </header>
 
-          <CountriesList />
+          <Suspense
+            fallback={
+              <section aria-label="Loading countries">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {Array.from({ length: 12 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="backdrop-blur-xl bg-white/10 rounded-2xl border border-white/20 overflow-hidden shadow-2xl"
+                    >
+                      <div className="aspect-video bg-gradient-to-br from-purple-500/20 to-pink-500/20 animate-pulse"></div>
+                      <div className="p-5 space-y-3">
+                        <div className="h-6 bg-white/10 rounded-lg animate-pulse"></div>
+                        <div className="space-y-2">
+                          <div className="h-4 bg-white/10 rounded animate-pulse"></div>
+                          <div className="h-4 bg-white/10 rounded animate-pulse"></div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            }
+          >
+            <CountriesList />
+          </Suspense>
         </div>
-      </div>
+    </div>
     </>
   );
 }

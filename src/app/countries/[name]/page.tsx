@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { Suspense } from "react";
+import BackButton from "../../components/back-button";
 import CountryDetail from "../../components/country-detail";
 import ScrollToTop from "../../components/scroll-to-top";
-import BackButton from "../../components/back-button";
 
 interface PageProps {
   params: Promise<{
@@ -9,7 +11,6 @@ interface PageProps {
   }>;
 }
 
-// Server-side metadata generation (still uses fetch for SEO)
 async function getCountryMetadata(name: string) {
   try {
     const fields = ["name", "capital", "region", "flags"].join(",");
@@ -20,7 +21,7 @@ async function getCountryMetadata(name: string) {
       {
         method: "GET",
         headers: { Accept: "application/json" },
-        next: { revalidate: 3600 }, // Cache for 1 hour
+        cache: "no-store",
       }
     );
 
@@ -95,11 +96,21 @@ export async function generateMetadata({
   };
 }
 
+async function CountryDetailWrapper({ name }: { name: string }) {
+  const countryComponent = await CountryDetail({ name });
+
+  if (!countryComponent) {
+    notFound();
+  }
+
+  return countryComponent;
+}
+
 export default async function CountryDetailPage({ params }: PageProps) {
   const { name } = await params;
   const decodedName = decodeURIComponent(name);
 
-  // Get country data for structured data (server-side for SEO)
+  // Get country data for structured data
   const country = await getCountryMetadata(decodedName);
 
   const structuredData = country
@@ -138,7 +149,25 @@ export default async function CountryDetailPage({ params }: PageProps) {
             <BackButton />
           </nav>
 
-          <CountryDetail name={decodedName} />
+          <Suspense
+            fallback={
+              <div className="space-y-8">
+                {/* Hero Skeleton */}
+                <div className="w-full h-[400px] bg-white/5 rounded-3xl animate-pulse" />
+                {/* Grid Skeleton */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {[...Array(6)].map((_, i) => (
+                    <div
+                      key={i}
+                      className="h-64 bg-white/5 rounded-3xl animate-pulse"
+                    />
+                  ))}
+                </div>
+              </div>
+            }
+          >
+            <CountryDetailWrapper name={decodedName} />
+          </Suspense>
         </div>
       </div>
     </>
