@@ -1,139 +1,9 @@
+"use client";
+
 import Image from "next/image";
+import { useCountry } from "@/hooks/use-countries";
 import CountryMap from "./country-map";
-
-interface CountryDetail {
-  name: {
-    common: string;
-    official: string;
-    nativeName?: {
-      [key: string]: {
-        official: string;
-        common: string;
-      };
-    };
-  };
-  cca2: string;
-  cca3: string;
-  capital?: string[];
-  region: string;
-  subregion?: string;
-  population: number;
-  area: number;
-  currencies?: {
-    [key: string]: {
-      name: string;
-      symbol: string;
-    };
-  };
-  languages?: {
-    [key: string]: string;
-  };
-  borders?: string[];
-  flags: {
-    png: string;
-    svg: string;
-    alt?: string;
-  };
-  coatOfArms?: {
-    png?: string;
-    svg?: string;
-  };
-  timezones: string[];
-  continents: string[];
-  latlng?: [number, number]; // [latitude, longitude]
-  independent?: boolean;
-  unMember?: boolean;
-  landlocked?: boolean;
-  demonyms?: {
-    [key: string]: {
-      f: string;
-      m: string;
-    };
-  };
-  fifa?: string;
-  car?: {
-    signs?: string[];
-    side: string;
-  };
-  idd?: {
-    root: string;
-    suffixes: string[];
-  };
-  tld?: string[];
-  startOfWeek?: string;
-  gini?: {
-    [key: string]: number;
-  };
-  status?: string;
-  capitalInfo?: {
-    latlng?: [number, number];
-  };
-}
-
-async function getCountryByName(name: string): Promise<CountryDetail | null> {
-  // API requires fields parameter - specify all fields we need for detail page
-  const fields = [
-    "name",
-    "cca2",
-    "cca3",
-    "capital",
-    "region",
-    "subregion",
-    "population",
-    "area",
-    "currencies",
-    "languages",
-    "borders",
-    "flags",
-    "coatOfArms",
-    "timezones",
-    "continents",
-    "latlng",
-    "independent",
-    "unMember",
-    "landlocked",
-    "demonyms",
-    "fifa",
-    "car",
-    "idd",
-    "tld",
-    "startOfWeek",
-    "gini",
-    "status",
-    "capitalInfo",
-  ].join(",");
-
-  const res = await fetch(
-    `https://restcountries.com/v3.1/name/${encodeURIComponent(
-      name
-    )}?fullText=true&fields=${fields}`,
-    {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
-      cache: "no-store",
-    }
-  );
-
-  if (!res.ok) {
-    console.error(`API Error: ${res.status} ${res.statusText}`);
-    return null;
-  }
-
-  const data = await res.json();
-
-  // Validate response
-  if (!Array.isArray(data) || data.length === 0) {
-    return null;
-  }
-
-  return data[0] || null;
-}
-
-interface CountryDetailProps {
-  name: string;
-}
+import type { CountryDetail as CountryDetailType } from "@/lib/types";
 
 // Icons as components to avoid external dependencies
 const Icons = {
@@ -300,13 +170,41 @@ const Icons = {
   ),
 };
 
-export default async function CountryDetail({ name }: CountryDetailProps) {
-  const country = await getCountryByName(name);
+// Loading skeleton component
+function LoadingSkeleton() {
+  return (
+    <div className="space-y-8 animate-pulse">
+      {/* Hero Skeleton */}
+      <div className="w-full h-[400px] bg-white/5 rounded-3xl" />
+      {/* Grid Skeleton */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="h-64 bg-white/5 rounded-3xl" />
+        ))}
+      </div>
+    </div>
+  );
+}
 
-  if (!country) {
-    return null;
-  }
+// Error component
+function ErrorDisplay({ error, onRetry }: { error: Error; onRetry: () => void }) {
+  return (
+    <div className="text-center py-12 backdrop-blur-xl bg-red-500/10 rounded-2xl border border-red-500/20">
+      <div className="text-6xl mb-4">😞</div>
+      <h2 className="text-2xl font-bold text-white mb-2">Country Not Found</h2>
+      <p className="text-red-200 mb-6">{error.message}</p>
+      <button
+        onClick={onRetry}
+        className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-purple-500/50"
+      >
+        Try Again
+      </button>
+    </div>
+  );
+}
 
+// Country content component
+function CountryContent({ country }: { country: CountryDetailType }) {
   const nativeName = country.name.nativeName
     ? Object.values(country.name.nativeName)[0]?.common || country.name.common
     : country.name.common;
@@ -397,20 +295,26 @@ export default async function CountryDetail({ name }: CountryDetailProps) {
             </div>
             <h2 className="text-xl font-bold text-white">Geography</h2>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-4">
               <div>
                 <p className="text-sm text-slate-400 mb-1">Subregion</p>
-                <p className="text-lg font-medium text-white">{country.subregion || "N/A"}</p>
+                <p className="text-lg font-medium text-white">
+                  {country.subregion || "N/A"}
+                </p>
               </div>
               <div>
                 <p className="text-sm text-slate-400 mb-1">Area</p>
-                <p className="text-lg font-medium text-white">{country.area.toLocaleString()} km²</p>
+                <p className="text-lg font-medium text-white">
+                  {country.area.toLocaleString()} km²
+                </p>
               </div>
               <div>
                 <p className="text-sm text-slate-400 mb-1">Continents</p>
-                <p className="text-lg font-medium text-white">{country.continents.join(", ")}</p>
+                <p className="text-lg font-medium text-white">
+                  {country.continents.join(", ")}
+                </p>
               </div>
             </div>
 
@@ -430,18 +334,22 @@ export default async function CountryDetail({ name }: CountryDetailProps) {
               ) : (
                 <p className="text-slate-500 italic">No land borders</p>
               )}
-              
+
               <div className="mt-6 pt-6 border-t border-white/5">
-                 <div className="flex gap-8">
-                    <div>
-                        <p className="text-sm text-slate-400 mb-1">Latitude</p>
-                        <p className="text-white font-mono">{country.latlng?.[0].toFixed(2)}°</p>
-                    </div>
-                    <div>
-                        <p className="text-sm text-slate-400 mb-1">Longitude</p>
-                        <p className="text-white font-mono">{country.latlng?.[1].toFixed(2)}°</p>
-                    </div>
-                 </div>
+                <div className="flex gap-8">
+                  <div>
+                    <p className="text-sm text-slate-400 mb-1">Latitude</p>
+                    <p className="text-white font-mono">
+                      {country.latlng?.[0].toFixed(2)}°
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-400 mb-1">Longitude</p>
+                    <p className="text-white font-mono">
+                      {country.latlng?.[1].toFixed(2)}°
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -462,7 +370,10 @@ export default async function CountryDetail({ name }: CountryDetailProps) {
               <div className="flex flex-wrap gap-2">
                 {country.languages ? (
                   Object.values(country.languages).map((lang) => (
-                    <span key={lang} className="text-white bg-purple-500/10 border border-purple-500/20 px-3 py-1 rounded-full text-sm">
+                    <span
+                      key={lang}
+                      className="text-white bg-purple-500/10 border border-purple-500/20 px-3 py-1 rounded-full text-sm"
+                    >
                       {lang}
                     </span>
                   ))
@@ -477,14 +388,19 @@ export default async function CountryDetail({ name }: CountryDetailProps) {
               <div className="space-y-2">
                 {country.currencies ? (
                   Object.entries(country.currencies).map(([code, curr]) => (
-                    <div key={code} className="flex items-center justify-between bg-white/5 p-3 rounded-xl">
+                    <div
+                      key={code}
+                      className="flex items-center justify-between bg-white/5 p-3 rounded-xl"
+                    >
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-yellow-500/20 flex items-center justify-center text-yellow-400 font-bold text-sm">
-                            {curr.symbol}
+                          {curr.symbol}
                         </div>
                         <span className="text-white">{curr.name}</span>
                       </div>
-                      <span className="text-xs font-mono text-slate-400">{code}</span>
+                      <span className="text-xs font-mono text-slate-400">
+                        {code}
+                      </span>
                     </div>
                   ))
                 ) : (
@@ -497,7 +413,7 @@ export default async function CountryDetail({ name }: CountryDetailProps) {
 
         {/* Codes & Info Card */}
         <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 hover:bg-white/10 transition-colors duration-300">
-           <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center gap-3 mb-6">
             <div className="p-2 bg-emerald-500/20 rounded-lg text-emerald-400">
               <Icons.Info />
             </div>
@@ -505,83 +421,100 @@ export default async function CountryDetail({ name }: CountryDetailProps) {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-             <div className="bg-white/5 p-4 rounded-2xl text-center">
-                <p className="text-xs text-slate-400 mb-1">CCA2</p>
-                <p className="text-2xl font-bold text-white">{country.cca2}</p>
-             </div>
-             <div className="bg-white/5 p-4 rounded-2xl text-center">
-                <p className="text-xs text-slate-400 mb-1">CCA3</p>
-                <p className="text-2xl font-bold text-white">{country.cca3}</p>
-             </div>
-             <div className="bg-white/5 p-4 rounded-2xl text-center">
-                <p className="text-xs text-slate-400 mb-1">FIFA</p>
-                <p className="text-xl font-bold text-white">{country.fifa || "-"}</p>
-             </div>
-             <div className="bg-white/5 p-4 rounded-2xl text-center">
-                <p className="text-xs text-slate-400 mb-1">TLD</p>
-                <p className="text-xl font-bold text-white">{country.tld?.[0] || "-"}</p>
-             </div>
+            <div className="bg-white/5 p-4 rounded-2xl text-center">
+              <p className="text-xs text-slate-400 mb-1">CCA2</p>
+              <p className="text-2xl font-bold text-white">{country.cca2}</p>
+            </div>
+            <div className="bg-white/5 p-4 rounded-2xl text-center">
+              <p className="text-xs text-slate-400 mb-1">CCA3</p>
+              <p className="text-2xl font-bold text-white">{country.cca3}</p>
+            </div>
+            <div className="bg-white/5 p-4 rounded-2xl text-center">
+              <p className="text-xs text-slate-400 mb-1">FIFA</p>
+              <p className="text-xl font-bold text-white">
+                {country.fifa || "-"}
+              </p>
+            </div>
+            <div className="bg-white/5 p-4 rounded-2xl text-center">
+              <p className="text-xs text-slate-400 mb-1">TLD</p>
+              <p className="text-xl font-bold text-white">
+                {country.tld?.[0] || "-"}
+              </p>
+            </div>
           </div>
-          
+
           <div className="mt-6 space-y-2">
-             <div className="flex justify-between items-center py-2 border-b border-white/5">
-                <span className="text-slate-400">Independent</span>
-                <span className={country.independent ? "text-emerald-400" : "text-red-400"}>
-                    {country.independent ? "Yes" : "No"}
-                </span>
-             </div>
-             <div className="flex justify-between items-center py-2 border-b border-white/5">
-                <span className="text-slate-400">UN Member</span>
-                <span className={country.unMember ? "text-emerald-400" : "text-red-400"}>
-                    {country.unMember ? "Yes" : "No"}
-                </span>
-             </div>
+            <div className="flex justify-between items-center py-2 border-b border-white/5">
+              <span className="text-slate-400">Independent</span>
+              <span
+                className={
+                  country.independent ? "text-emerald-400" : "text-red-400"
+                }
+              >
+                {country.independent ? "Yes" : "No"}
+              </span>
+            </div>
+            <div className="flex justify-between items-center py-2 border-b border-white/5">
+              <span className="text-slate-400">UN Member</span>
+              <span
+                className={
+                  country.unMember ? "text-emerald-400" : "text-red-400"
+                }
+              >
+                {country.unMember ? "Yes" : "No"}
+              </span>
+            </div>
           </div>
         </div>
 
         {/* Fun Facts / Extra Card */}
         <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 hover:bg-white/10 transition-colors duration-300 lg:col-span-2">
-           <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center gap-3 mb-6">
             <div className="p-2 bg-orange-500/20 rounded-lg text-orange-400">
               <Icons.Car />
             </div>
-            <h2 className="text-xl font-bold text-white">Travel & Communication</h2>
+            <h2 className="text-xl font-bold text-white">
+              Travel & Communication
+            </h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-             <div className="flex items-start gap-4">
-                <div className="p-3 bg-white/5 rounded-xl">
-                    <Icons.Car />
-                </div>
-                <div>
-                    <p className="text-sm text-slate-400">Driving Side</p>
-                    <p className="text-xl font-medium text-white capitalize">{country.car?.side || "Right"}</p>
-                </div>
-             </div>
-             
-             <div className="flex items-start gap-4">
-                <div className="p-3 bg-white/5 rounded-xl">
-                    <Icons.Phone />
-                </div>
-                <div>
-                    <p className="text-sm text-slate-400">Calling Code</p>
-                    <p className="text-xl font-medium text-white">
-                        {country.idd?.root}{country.idd?.suffixes?.[0]}
-                    </p>
-                </div>
-             </div>
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-white/5 rounded-xl">
+                <Icons.Car />
+              </div>
+              <div>
+                <p className="text-sm text-slate-400">Driving Side</p>
+                <p className="text-xl font-medium text-white capitalize">
+                  {country.car?.side || "Right"}
+                </p>
+              </div>
+            </div>
 
-             <div className="flex items-start gap-4">
-                <div className="p-3 bg-white/5 rounded-xl">
-                    <Icons.Coins />
-                </div>
-                <div>
-                    <p className="text-sm text-slate-400">Gini Index</p>
-                    <p className="text-xl font-medium text-white">
-                        {country.gini ? Object.values(country.gini)[0] : "N/A"}
-                    </p>
-                </div>
-             </div>
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-white/5 rounded-xl">
+                <Icons.Phone />
+              </div>
+              <div>
+                <p className="text-sm text-slate-400">Calling Code</p>
+                <p className="text-xl font-medium text-white">
+                  {country.idd?.root}
+                  {country.idd?.suffixes?.[0]}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-white/5 rounded-xl">
+                <Icons.Coins />
+              </div>
+              <div>
+                <p className="text-sm text-slate-400">Gini Index</p>
+                <p className="text-xl font-medium text-white">
+                  {country.gini ? Object.values(country.gini)[0] : "N/A"}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -589,13 +522,43 @@ export default async function CountryDetail({ name }: CountryDetailProps) {
       {/* Map Section */}
       <section className="mt-8 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-2">
         <div className="rounded-2xl overflow-hidden">
-             <CountryMap
-                countryName={country.name.common}
-                coordinates={country.latlng}
-                capital={country.capital?.[0]}
-            />
+          <CountryMap
+            countryName={country.name.common}
+            coordinates={country.latlng}
+            capital={country.capital?.[0]}
+          />
         </div>
       </section>
     </>
   );
+}
+
+interface CountryDetailProps {
+  name: string;
+}
+
+export default function CountryDetail({ name }: CountryDetailProps) {
+  const { data: country, isLoading, isError, error, refetch } = useCountry(name);
+
+  if (isLoading) {
+    return <LoadingSkeleton />;
+  }
+
+  if (isError) {
+    return <ErrorDisplay error={error as Error} onRetry={() => refetch()} />;
+  }
+
+  if (!country) {
+    return (
+      <div className="text-center py-12">
+        <div className="text-6xl mb-4">🔍</div>
+        <h2 className="text-2xl font-bold text-white mb-2">Country Not Found</h2>
+        <p className="text-purple-200">
+          We couldn&apos;t find information about this country.
+        </p>
+      </div>
+    );
+  }
+
+  return <CountryContent country={country} />;
 }

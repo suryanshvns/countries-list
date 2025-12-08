@@ -2,26 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
-
-interface Country {
-  name: {
-    common: string;
-    official: string;
-  };
-  cca2: string;
-  cca3: string;
-  capital?: string[];
-  region: string;
-  population: number;
-  flags: {
-    png: string;
-    svg: string;
-    alt?: string;
-  };
-}
+import type { CountryBase } from "@/lib/types";
 
 interface CountryCardProps {
-  country: Country;
+  country: CountryBase;
 }
 
 export default function CountryCard({ country }: CountryCardProps) {
